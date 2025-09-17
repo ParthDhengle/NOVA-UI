@@ -29,6 +29,7 @@ function createMainWindow() {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: false,
     },
     backgroundColor: 'transparent',
   });
@@ -86,10 +87,11 @@ function createMiniWindow() {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: false,
     },
     backgroundColor: 'transparent',
   });
-
+mainWindow.webContents.openDevTools({ mode: 'detach' });
   // Load with mini mode
   if (process.env.NODE_ENV === 'development') {
     miniWindow.loadURL('http://localhost:5173?mini=true');
@@ -141,14 +143,26 @@ ipcMain.handle('requestExpand', async () => {
 
     // Wait for main window to be loaded if not ready
     if (!mainLoaded) {
-      console.log('MAIN: Waiting for main window to load...');
+      console.log('MAIN: !mainLoaded=true, creating wait Promise...');
       await new Promise(resolve => {
+        console.log('MAIN: Inside Promise constructor...');
         if (mainWindow) {
-          mainWindow.webContents.once('did-finish-load', resolve);
+          console.log('MAIN: mainWindow exists, setting .once...');
+          mainWindow.webContents.once('did-finish-load', () => {
+            console.log('MAIN: .once fired! Resolving...');
+            resolve(undefined);
+          });
+          // ADD THIS TEMP CHECK: If already loaded, resolve immediately
+          if (!mainWindow.webContents.isLoading()) {
+            console.log('MAIN: Already loaded (isLoading=false), forcing resolve...');
+            setTimeout(resolve, 0);
+          }
         } else {
+          console.log('MAIN: No mainWindow, resolving...');
           resolve(undefined);
         }
       });
+      console.log('MAIN: Wait Promise resolved!');  // This won't log if hanging
     }
 
     // Show and focus main window

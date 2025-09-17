@@ -18,6 +18,7 @@ export const useElectronApi = () => {
     window.api && 
     typeof window.api === 'object'
   );
+  
 
   // Enhanced fallback for when running in browser (development)
   const mockApi = {
@@ -59,7 +60,10 @@ export const useElectronApi = () => {
   };
 
   const api = isElectron ? window.api : mockApi;
-
+  console.log('window.api:', window.api);  // Should log the full API object, not undefined
+if (window.api) {
+  window.api.requestExpand();  // Should log from real IPC, not "Mock:"
+}
   return {
     api,
     isElectron,
@@ -200,6 +204,7 @@ export const useWindowControls = () => {
     console.log('HOOK: Calling api.requestExpand...');
     
     try {
+      console.log('HOOK: About to await requestExpand...');
       const result = await api.requestExpand?.();
       console.log('HOOK: api.requestExpand succeeded:', result);
       

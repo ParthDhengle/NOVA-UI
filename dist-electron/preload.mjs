@@ -2,7 +2,12 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 console.log('PRELOAD: Starting preload script...');
 
-contextBridge.exposeInMainWorld('api', {
+(async () => {
+  try {
+    const { contextBridge, ipcRenderer } = await import('electron');
+    console.log('PRELOAD: Starting preload script...');
+    
+    contextBridge.exposeInMainWorld('api', {
   // Window expansion/minimization with proper error handling
   requestExpand: async () => {
     console.log('RENDERER: Calling requestExpand via IPC...');
@@ -132,5 +137,10 @@ contextBridge.exposeInMainWorld('api', {
   isElectron: true,
   isMiniMode: typeof window !== 'undefined' && window.isMiniMode,
 });
+console.log('PRELOAD: contextBridge exposed window.api successfully');
+  } catch (error) {
+    console.error('PRELOAD: Failed to load Electron modules:', error);
+  }
+})();
 
 console.log('PRELOAD: contextBridge exposed window.api successfully');

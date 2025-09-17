@@ -5,13 +5,13 @@
   "type": "module",
   "main": "dist-electron/main.mjs",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development concurrently \"vite\" \"wait-on http://localhost:5173 && electronmon .\"",
+    "dev": "cross-env NODE_ENV=development concurrently \"vite\" \"wait-on http://localhost:5173 && electronmon . --enable-logging=1\"",
     "build": "vite build && electron-builder",
     "build:ui": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "electron:dev": "cross-env NODE_ENV=development concurrently \"npm run build:ui\" \"wait-on dist/index.html && electron .\"",
+    "electron:dev": "cross-env NODE_ENV=development concurrently \"vite\" \"wait-on http://localhost:5173 && electron . --enable-logging=1\"",
     "electron:build": "npm run build:ui && electron-builder"
   },
   "build": {
