@@ -13,13 +13,12 @@ import type {
  * Provides typed access to window.api methods with React state management
  */
 export const useElectronApi = () => {
-  const [isElectron] = useState(() => 
-    typeof window !== 'undefined' && 
-    window.api && 
+  const [isElectron] = useState(() =>
+    typeof window !== 'undefined' &&
+    window.api &&
     typeof window.api === 'object'
   );
-  
-
+ 
   // Enhanced fallback for when running in browser (development)
   const mockApi = {
     requestExpand: async () => {
@@ -58,25 +57,24 @@ export const useElectronApi = () => {
     sendMessage: async (message: string, sessionId?: string) => ({ sessionId: sessionId || 'mock-session' }),
     notify: (title: string, body?: string) => console.log('Mock: notify', title, body),
   };
-
   const api = isElectron ? window.api : mockApi;
-  console.log('window.api:', window.api);  // Should log the full API object, not undefined
-if (window.api) {
-  window.api.requestExpand();  // Should log from real IPC, not "Mock:"
-}
+  
+  // FIXED: Remove the test call—causes IPC loop/crash!
+  console.log('HOOK: useElectronApi initialized, isElectron:', isElectron);
+  
   return {
     api,
     isElectron,
   };
 };
 
+// Rest of hooks unchanged...
 /**
  * Hook for managing agent operations state
  */
 export const useAgentOps = () => {
   const [operations, setOperations] = useState<AgentOp[]>([]);
   const { api, isElectron } = useElectronApi();
-
   useEffect(() => {
     if (!isElectron) {
       // Mock data for development
@@ -99,16 +97,13 @@ export const useAgentOps = () => {
       ]);
       return;
     }
-
     const unsubscribe = api.onAgentOpsUpdate?.(setOperations);
     return unsubscribe;
   }, [api, isElectron]);
-
   const cancelOperation = useCallback((id: string) => {
     // TODO: IMPLEMENT IN PRELOAD - api.cancelOperation(id)
     setOperations(ops => ops.filter(op => op.id !== id));
   }, []);
-
   return {
     operations,
     cancelOperation,
@@ -123,15 +118,12 @@ export const useVoiceTranscription = () => {
   const [transcript, setTranscript] = useState('');
   const [isPartial, setIsPartial] = useState(false);
   const { api } = useElectronApi();
-
   const startRecording = useCallback(async () => {
     const sessionId = `voice-${Date.now()}`;
     setIsRecording(true);
     setTranscript('');
-
     try {
       await api.transcribeStart(sessionId);
-
       // Set up streaming transcript
       api.transcribeStream(sessionId, (text: string, partial: boolean) => {
         setTranscript(text);
@@ -142,18 +134,15 @@ export const useVoiceTranscription = () => {
       setIsRecording(false);
     }
   }, [api]);
-
   const stopRecording = useCallback(async () => {
     const sessionId = `voice-${Date.now()}`;
     setIsRecording(false);
-
     try {
       await api.transcribeStop(sessionId);
     } catch (error) {
       console.error('Failed to stop recording:', error);
     }
   }, [api]);
-
   return {
     isRecording,
     transcript,
@@ -169,7 +158,6 @@ export const useVoiceTranscription = () => {
 export const useWindowControls = () => {
   const { api, isElectron } = useElectronApi();
   const [isExpanding, setIsExpanding] = useState(false);
-
   const minimize = useCallback(() => {
     try {
       api.windowMinimize?.();
@@ -177,7 +165,6 @@ export const useWindowControls = () => {
       console.error('Failed to minimize window:', error);
     }
   }, [api]);
-
   const maximize = useCallback(() => {
     try {
       api.windowMaximize?.();
@@ -185,7 +172,6 @@ export const useWindowControls = () => {
       console.error('Failed to maximize window:', error);
     }
   }, [api]);
-
   const close = useCallback(() => {
     try {
       api.windowClose?.();
@@ -193,24 +179,22 @@ export const useWindowControls = () => {
       console.error('Failed to close window:', error);
     }
   }, [api]);
-
   const expand = useCallback(async () => {
     if (isExpanding) {
       console.log('HOOK: Expand already in progress, skipping...');
       return { success: false, error: 'Expand already in progress' };
     }
-
     setIsExpanding(true);
     console.log('HOOK: Calling api.requestExpand...');
-    
+   
     try {
       console.log('HOOK: About to await requestExpand...');
       const result = await api.requestExpand?.();
       console.log('HOOK: api.requestExpand succeeded:', result);
-      
+     
       // Add a small delay to ensure window switch completes
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+     
       return result || { success: true };
     } catch (error) {
       console.error('HOOK: api.requestExpand failed:', error);
@@ -220,7 +204,6 @@ export const useWindowControls = () => {
       setTimeout(() => setIsExpanding(false), 1000);
     }
   }, [api, isExpanding]);
-
   const miniClose = useCallback(() => {
     try {
       if (isElectron && api.miniClose) {
@@ -232,13 +215,12 @@ export const useWindowControls = () => {
       console.error('Failed to close mini window:', error);
     }
   }, [api, isElectron]);
-
-  return { 
-    minimize, 
-    maximize, 
-    close, 
-    expand, 
+  return {
+    minimize,
+    maximize,
+    close,
+    expand,
     miniClose,
-    isExpanding 
+    isExpanding
   };
 };
