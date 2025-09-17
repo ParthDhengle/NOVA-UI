@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
   SelectLabel,
+  SelectGroup,
 } from '@/components/ui/select';
 import { 
   DropdownMenu,
@@ -144,23 +145,25 @@ export default function Topbar({
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectLabel>Choose Nova's Role</SelectLabel>
-              {Object.entries(roleConfig).map(([key, config]) => {
-                const Icon = config.icon;
-                return (
-                  <SelectItem key={key} value={key}>
-                    <div className="flex items-center gap-2">
-                      <Icon size={16} className={config.color} />
-                      <div className="flex flex-col">
-                        <span className="font-medium">{config.label}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {config.description}
-                        </span>
+              <SelectGroup>
+                <SelectLabel>Choose Nova's Role</SelectLabel>
+                {Object.entries(roleConfig).map(([key, config]) => {
+                  const Icon = config.icon;
+                  return (
+                    <SelectItem key={key} value={key}>
+                      <div className="flex items-center gap-2">
+                        <Icon size={16} className={config.color} />
+                        <div className="flex flex-col">
+                          <span className="font-medium">{config.label}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {config.description}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </SelectItem>
-                );
-              })}
+                    </SelectItem>
+                  );
+                })}
+              </SelectGroup>
             </SelectContent>
           </Select>
 
