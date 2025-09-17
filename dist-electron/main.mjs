@@ -1,9 +1,14 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const path = require('path');
-const { spawn } = require('child_process');  // For Python linking (later)
+import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
 
-let mainWindow;  // Full chat window
-let miniWindow;  // Mini widget window
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+let mainWindow; // Full chat window
+let miniWindow; // Mini widget window
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -11,14 +16,14 @@ function createMainWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    frame: false,  // Frameless for custom titlebar
-    transparent: true,  // For glassmorphism
+    frame: false, // Frameless for custom titlebar
+    transparent: true, // For glassmorphism
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,
       contextIsolation: true,
     },
-    backgroundColor: '#05060A',  // Your black bg
+    backgroundColor: '#05060A', // Your black bg
   });
 
   // Load your React build
@@ -47,10 +52,10 @@ function createMiniWindow() {
     height: 100,
     frame: false,
     transparent: true,
-    alwaysOnTop: true,  // Stays on top of other apps
-    skipTaskbar: true,  // No taskbar icon
+    alwaysOnTop: true, // Stays on top of other apps
+    skipTaskbar: true, // No taskbar icon
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,
       contextIsolation: true,
     },
@@ -58,7 +63,7 @@ function createMiniWindow() {
   });
 
   // Load MiniWidget as standalone (your MiniWidget.tsx exports a component)
-  miniWindow.loadFile(path.join(__dirname, '../dist/index.html?mini=true'));  // Use query param to render only MiniWidget
+  mainWindow.loadFile(path.join(__dirname, '../dist/index.html?minimrue'));
 
   // Draggable: Make whole window draggable
   miniWindow.setIgnoreMouseEvents(false, { forward: false });
@@ -66,7 +71,7 @@ function createMiniWindow() {
   // Click-outside to minimize (shrink to mini)
   miniWindow.on('blur', () => {
     if (mainWindow && !mainWindow.isVisible()) {
-      miniWindow.webContents.send('minimize-widget');  // Trigger UI shrink
+      miniWindow.webContents.send('minimize-widget'); // Trigger UI shrink
     }
   });
 }
@@ -99,13 +104,12 @@ ipcMain.handle('setAlwaysOnTop', (event, flag) => {
 
 // Voice (local Whisper via Python - stub for now)
 ipcMain.handle('transcribeStart', async (event, sessionId) => {
-  // Spawn Python Whisper script (see Step 4)
+  // Spawn Python Whisper script (add your logic here)
   const pythonProcess = spawn('python', ['path/to/your/whisper_script.py', sessionId]);
   // Handle stdout for streaming...
 });
 
 // Add other ipcMain.handle for your window.api methods (e.g., speak, executeAction)
-// For full list, see your types.ts - implement mocks first, then real logic.
 
 app.whenReady().then(() => {
   createMainWindow();
