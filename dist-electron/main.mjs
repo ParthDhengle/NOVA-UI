@@ -2,14 +2,11 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
-
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 let mainWindow; // Full chat window
 let miniWindow; // Mini widget window
-
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -24,19 +21,16 @@ function createMainWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
-    backgroundColor: '#05060A', // Solid fallback to fix black box on Windows
+    backgroundColor: 'transparent', // Changed to transparent
   });
-
   // Load URL in dev, file in prod (fixes blank window)
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL('http://localhost:8080');
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
-
   // Hide on start, show mini first
   mainWindow.hide();
-
   // Auto-open DevTools only in dev, with error handling (fixes crash)
   if (process.env.NODE_ENV === 'development') {
     try {
@@ -45,7 +39,6 @@ function createMainWindow() {
       console.warn('DevTools open failed:', err);
     }
   }
-
   // Apply theme (CSS vars for dark cyan)
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.webContents.insertCSS(`
@@ -59,7 +52,6 @@ function createMainWindow() {
     `);
   });
 }
-
 function createMiniWindow() {
   miniWindow = new BrowserWindow({
     width: 280, // Fixed: Smaller phone-like rect (was 400x600, now compact)
@@ -68,15 +60,18 @@ function createMiniWindow() {
     transparent: true, // Glass, but solid bg fallback
     alwaysOnTop: true, // Stays on top
     skipTaskbar: true, // No taskbar
-    resizable: false, // Fixed for mini
+    resizable: true, // Changed: Enable resizing for adjustable size
+    minWidth: 200,
+    minHeight: 300,
+    maxWidth: 400,
+    maxHeight: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,
       contextIsolation: true,
     },
-    backgroundColor: '#05060A', // Solid fallback to fix black/overlap on Windows
+    backgroundColor: 'transparent', // Changed to transparent for no black bg
   });
-
   // Load with mini mode (dev URL, prod file + global flag)
   if (process.env.NODE_ENV === 'development') {
     miniWindow.loadURL('http://localhost:8080?mini=true');
@@ -88,7 +83,6 @@ function createMiniWindow() {
       document.documentElement.setAttribute('data-mini', 'true');
     `);
   }
-
   // Conditional DevTools (fixes crash)
   if (process.env.NODE_ENV === 'development') {
     try {
@@ -97,20 +91,17 @@ function createMiniWindow() {
       console.warn('Mini DevTools open failed:', err);
     }
   }
-
   // Draggable: CSS handles it (no setIgnoreMouseEvents needed for frameless)
   miniWindow.on('blur', () => {
     if (mainWindow && !mainWindow.isVisible()) {
       miniWindow.webContents.send('minimize-widget');
     }
   });
-
   // Error handling for load (prevents crash)
   miniWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
     console.error('Mini load failed:', errorDescription);
   });
 }
-
 // IPC (fixed on/send mismatch from previous)
 ipcMain.handle('requestExpand', () => { // Fixed: handle for invoke
   if (miniWindow) miniWindow.hide();
@@ -120,7 +111,6 @@ ipcMain.handle('requestExpand', () => { // Fixed: handle for invoke
     mainWindow.setAlwaysOnTop(false);
   }
 });
-
 ipcMain.handle('requestMinimize', () => {
   if (mainWindow) {
     mainWindow.hide();
@@ -131,17 +121,14 @@ ipcMain.handle('requestMinimize', () => {
     miniWindow.setAlwaysOnTop(true);
   }
 });
-
 ipcMain.handle('setAlwaysOnTop', (event, flag) => {
   if (mainWindow) mainWindow.setAlwaysOnTop(flag);
   if (miniWindow) miniWindow.setAlwaysOnTop(flag);
 });
-
 // Fixed: Use ipcMain.on for send events (matches preload)
 ipcMain.on("window:minimize", () => {
   mainWindow?.minimize();
 });
-
 ipcMain.on("window:maximize", () => {
   if (mainWindow?.isMaximized()) {
     mainWindow.unmaximize();
@@ -149,13 +136,10 @@ ipcMain.on("window:maximize", () => {
     mainWindow?.maximize();
   }
 });
-
 ipcMain.on("window:close", () => {
   app.quit(); // Fixed: app.quit() instead of mainWindow.close() for full quit
 });
-
 // ... (voice stub unchanged)
-
 app.whenReady().then(() => {
   createMainWindow();
   createMiniWindow();
@@ -166,7 +150,6 @@ app.whenReady().then(() => {
     }
   });
 });
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });

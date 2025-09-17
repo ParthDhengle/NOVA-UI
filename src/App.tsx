@@ -5,46 +5,30 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { NovaProvider } from "@/context/NovaContext";
 import MiniWidget from "@/components/MiniWidget"; // Assume this exists
-import FullChat from "@/components/FullChat"; // Assume this exists
+import MainLayout from "@/components/MainLayout"; // NEW: Import MainLayout
 import SchedulerKanban from "@/components/SchedulerKanban"; // Assume this exists
 import DashboardCard from "@/components/DashboardCard"; // Assume this exists
 import Settings from "@/components/Settings"; // Assume this exists
 import { useNova } from "@/context/NovaContext";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
-
 function AppContent() {
   const { state } = useNova();
   // Fixed: Handle URL + global flag for prod (no ?mini=true on file load)
   const urlParams = new URLSearchParams(window.location.search);
-  const isMini = urlParams.get('mini') === 'true' || 
+  const isMini = urlParams.get('mini') === 'true' ||
                  (typeof window !== 'undefined' && (window as any).isMiniMode) || // Prod flag
                  state.isMiniMode;
   if (isMini) {
     return <MiniWidget unreadCount={2} />;
   }
-  
+ 
   if (state.isMiniMode) {
     return <MiniWidget unreadCount={2} />;
   }
-
-  switch (state.view) {
-    case 'scheduler':
-      return <SchedulerKanban />;
-    case 'dashboard':
-      return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-background">
-          <DashboardCard />
-        </div>
-      );
-    case 'settings':
-      return <Settings />;
-    default:
-      return <FullChat />;
-  }
+  // NEW: Wrap all views in MainLayout for consistent navigation
+  return <MainLayout />;
 }
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -63,5 +47,4 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
-
 export default App;

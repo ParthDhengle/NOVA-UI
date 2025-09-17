@@ -1,21 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
-import type { 
-  AgentOp, 
-  SchedulerTask, 
-  ChatSession, 
+import type {
+  AgentOp,
+  SchedulerTask,
+  ChatSession,
   ChatMessage,
   Integration,
-  NovaRole 
+  NovaRole
 } from '@/api/types';
-
 /**
  * React hook wrapper for Electron API interactions
  * Provides typed access to window.api methods with React state management
  */
-
 export const useElectronApi = () => {
   const [isElectron] = useState(() => typeof window !== 'undefined' && window.api);
-
   // Fallback for when running in browser (development)
   const mockApi = {
     requestExpand: () => console.log('Mock: requestExpand'),
@@ -46,22 +43,18 @@ export const useElectronApi = () => {
     sendMessage: async (message: string, sessionId?: string) => ({ sessionId: sessionId || 'mock-session' }),
     notify: (title: string, body?: string) => console.log('Mock: notify', title, body),
   };
-
   const api = isElectron ? window.api : mockApi;
-
   return {
     api,
     isElectron,
   };
 };
-
 /**
  * Hook for managing agent operations state
  */
 export const useAgentOps = () => {
   const [operations, setOperations] = useState<AgentOp[]>([]);
   const { api, isElectron } = useElectronApi();
-
   useEffect(() => {
     if (!isElectron) {
       // Mock data for development
@@ -75,7 +68,7 @@ export const useAgentOps = () => {
           startTime: Date.now() - 30000,
         },
         {
-          id: '2', 
+          id: '2',
           title: 'Email draft preparation',
           desc: 'Preparing response to client inquiry',
           status: 'pending',
@@ -84,22 +77,18 @@ export const useAgentOps = () => {
       ]);
       return;
     }
-
     const unsubscribe = api.onAgentOpsUpdate?.(setOperations);
     return unsubscribe;
   }, [api, isElectron]);
-
   const cancelOperation = useCallback((id: string) => {
     // TODO: IMPLEMENT IN PRELOAD - api.cancelOperation(id)
     setOperations(ops => ops.filter(op => op.id !== id));
   }, []);
-
   return {
     operations,
     cancelOperation,
   };
 };
-
 /**
  * Hook for managing voice transcription
  */
@@ -108,15 +97,14 @@ export const useVoiceTranscription = () => {
   const [transcript, setTranscript] = useState('');
   const [isPartial, setIsPartial] = useState(false);
   const { api } = useElectronApi();
-
   const startRecording = useCallback(async () => {
     const sessionId = `voice-${Date.now()}`;
     setIsRecording(true);
     setTranscript('');
-    
+   
     try {
       await api.transcribeStart(sessionId);
-      
+     
       // Set up streaming transcript
       api.transcribeStream(sessionId, (text: string, partial: boolean) => {
         setTranscript(text);
@@ -127,18 +115,16 @@ export const useVoiceTranscription = () => {
       setIsRecording(false);
     }
   }, [api]);
-
   const stopRecording = useCallback(async () => {
     const sessionId = `voice-${Date.now()}`;
     setIsRecording(false);
-    
+   
     try {
       await api.transcribeStop(sessionId);
     } catch (error) {
       console.error('Failed to stop recording:', error);
     }
   }, [api]);
-
   return {
     isRecording,
     transcript,
@@ -147,24 +133,22 @@ export const useVoiceTranscription = () => {
     stopRecording,
   };
 };
-
 /**
  * Hook for managing window state
  */
 export const useWindowControls = () => {
   const { api } = useElectronApi();
-
   const minimize = useCallback(() => {
     api.windowMinimize?.(); // Fixed: Now safe with mock
   }, [api]);
-
   const maximize = useCallback(() => {
     api.windowMaximize?.(); // Fixed: Now safe with mock
   }, [api]);
-
   const close = useCallback(() => {
     api.windowClose?.(); // Fixed: Now safe with mock
   }, [api]);
-
-  return { minimize, maximize, close };
+  const expand = useCallback(() => { // NEW: Add expand
+    api.requestExpand?.();
+  }, [api]);
+  return { minimize, maximize, close, expand };
 };
