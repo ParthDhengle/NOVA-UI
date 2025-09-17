@@ -3,23 +3,55 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { NovaProvider } from "@/context/NovaContext";
+import MiniWidget from "@/components/MiniWidget";
+import FullChat from "@/components/FullChat";
+import SchedulerKanban from "@/components/SchedulerKanban";
+import DashboardCard from "@/components/DashboardCard";
+import Settings from "@/components/Settings";
+import { useNova } from "@/context/NovaContext";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+function AppContent() {
+  const { state } = useNova();
+  
+  if (state.isMiniMode) {
+    return <MiniWidget unreadCount={2} />;
+  }
+
+  switch (state.view) {
+    case 'scheduler':
+      return <SchedulerKanban />;
+    case 'dashboard':
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+          <DashboardCard />
+        </div>
+      );
+    case 'settings':
+      return <Settings />;
+    default:
+      return <FullChat />;
+  }
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <NovaProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-background text-foreground">
+            <Routes>
+              <Route path="/" element={<AppContent />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </NovaProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
