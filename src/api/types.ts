@@ -78,7 +78,7 @@ declare global {
       windowMinimize(): void; // NEW: Minimize the window
       windowMaximize(): void; // NEW: Maximize/restore the window
       windowClose(): void; // NEW: Close the app
-
+      miniClose(): void; // NEW: Close mini mode window
       // Voice / Local Whisper
       transcribeStart(sessionId: string): Promise<void>;
       transcribeStop(sessionId: string): Promise<void>;
