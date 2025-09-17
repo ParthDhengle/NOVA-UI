@@ -11,11 +11,19 @@ import DashboardCard from "@/components/DashboardCard";
 import Settings from "@/components/Settings";
 import { useNova } from "@/context/NovaContext";
 import NotFound from "./pages/NotFound";
+import { useSearchParams } from 'react-router-dom';
 
 const queryClient = new QueryClient();
 
+
 function AppContent() {
+  const [searchParams] = useSearchParams();
   const { state } = useNova();
+  const isMini = searchParams.get('mini') === 'true' || state.isMiniMode;
+  
+  if (isMini) {
+    return <MiniWidget unreadCount={2} />;
+  }
   
   if (state.isMiniMode) {
     return <MiniWidget unreadCount={2} />;
