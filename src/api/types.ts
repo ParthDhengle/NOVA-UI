@@ -41,7 +41,7 @@ export type ChatMessage = {
 export type MessageAction = {
   type: 'accept_schedule' | 'reschedule' | 'send_email' | 'run_operation';
   label: string;
-  payload?: any;
+  payload?: unknown; // Fixed: Changed from any
 };
 
 export type ChatSession = {
@@ -93,7 +93,7 @@ declare global {
       onMessageStream(cb: (message: ChatMessage) => void): Unsubscribe;
       
       // Agentic operations
-      executeAction(action: { type: string; payload?: any }): Promise<{ ok: boolean }>;
+      executeAction(action: { type: string; payload?: unknown }): Promise<{ ok: boolean }>; // Fixed: payload unknown
       onAgentOpsUpdate(cb: (ops: AgentOp[]) => void): Unsubscribe;
 
       // Scheduler
@@ -110,7 +110,7 @@ declare global {
 
       // Integrations
       openExternalAuth(service: 'email' | 'google' | 'calendar'): Promise<void>;
-      enableIntegration(service: string, credentials: any): Promise<{ ok: boolean }>;
+      enableIntegration(service: string, credentials: unknown): Promise<{ ok: boolean }>; // Fixed: credentials unknown
       getIntegrations(): Promise<Integration[]>;
 
       // Exports
@@ -123,7 +123,7 @@ declare global {
         selectedModel: string;
         alwaysOnTop: boolean;
       }>;
-      updateUserPreferences(prefs: any): Promise<void>;
+      updateUserPreferences(prefs: unknown): Promise<void>; // Fixed: prefs unknown
 
       // Misc
       notify(title: string, body?: string): void;

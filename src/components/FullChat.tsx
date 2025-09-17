@@ -83,13 +83,13 @@ export default function FullChat({
       {/* Custom Titlebar */}
       <div 
         className="titlebar bg-background border-b border-border flex items-center justify-between px-4 h-10 select-none"
-        style={{ WebkitAppRegion: "drag" }} // Make draggable in Electron
+        style={{ ['-webkit-app-region']: 'drag' as const }} // Fixed: Indexed access for Electron CSS prop
       >
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-primary rounded-full" /> {/* App icon */}
           <span className="text-sm font-medium">Nova AI Assistant</span>
         </div>
-        <div className="flex items-center gap-2" style={{ WebkitAppRegion: "no-drag" }}>
+        <div className="flex items-center gap-2" style={{ ['-webkit-app-region']: 'no-drag' as const }}> {/* Fixed: Indexed access for Electron CSS prop */}
           <button onClick={minimize} title="Minimize" className="hover:text-primary">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
               <rect x="1" y="5.5" width="10" height="1" rx="0.5" />

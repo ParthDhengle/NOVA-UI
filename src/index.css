@@ -135,6 +135,10 @@ All colors MUST be HSL. Local-first, privacy-focused design language.
     justify-content: space-between;
     padding: 0 8px;
   }
+  .nova-mini-widget {
+  position: fixed !important; /* Ensure Electron override */
+  z-index: 9999;
+}
 
   .titlebar-controls {
     display: flex;

@@ -6,7 +6,8 @@ contextBridge.exposeInMainWorld('api', {
   setAlwaysOnTop: (flag) => ipcRenderer.invoke('setAlwaysOnTop', flag),
   windowMinimize: () => ipcRenderer.send("window:minimize"),
   windowMaximize: () => ipcRenderer.send("window:maximize"),
-  windowClose: () => ipcRenderer.send("window:close"),  transcribeStart: (sessionId) => ipcRenderer.invoke('transcribeStart', sessionId),
+  windowClose: () => ipcRenderer.send("window:close"),
+  transcribeStart: (sessionId) => ipcRenderer.invoke('transcribeStart', sessionId),
   transcribeStop: (sessionId) => ipcRenderer.invoke('transcribeStop', sessionId),
   transcribeStream: (sessionId, cb) => {
     ipcRenderer.on(`transcribe-stream-${sessionId}`, (event, text, partial) => cb(text, partial));

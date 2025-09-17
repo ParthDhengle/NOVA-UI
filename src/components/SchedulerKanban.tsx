@@ -336,7 +336,7 @@ function TaskEditDialog({ task, open, onOpenChange, onSave }: TaskEditDialogProp
               <Label htmlFor="priority">Priority</Label>
               <Select
                 value={formData.priority}
-                onValueChange={(value: any) => setFormData(prev => ({ ...prev, priority: value }))}
+                onValueChange={(value: 'High' | 'Medium' | 'Low') => setFormData(prev => ({ ...prev, priority: value }))} // Fixed: Specific type
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />

@@ -173,6 +173,10 @@ const initialState: NovaState = {
 };
 
 function novaReducer(state: NovaState, action: NovaAction): NovaState {
+  // Move const outside switch
+  let updatedSessions = state.sessions;
+  let updatedCurrentSession = state.currentSession;
+
   switch (action.type) {
     case 'SET_VIEW':
       return { ...state, view: action.payload };
@@ -185,16 +189,18 @@ function novaReducer(state: NovaState, action: NovaAction): NovaState {
       
     case 'ADD_MESSAGE':
       const { sessionId, message } = action.payload;
+      updatedSessions = state.sessions.map(session => 
+        session.id === sessionId 
+          ? { ...session, messages: [...session.messages, message], updatedAt: Date.now() }
+          : session
+      );
+      updatedCurrentSession = state.currentSession?.id === sessionId
+        ? { ...state.currentSession, messages: [...state.currentSession.messages, message] }
+        : state.currentSession;
       return {
         ...state,
-        sessions: state.sessions.map(session => 
-          session.id === sessionId 
-            ? { ...session, messages: [...session.messages, message], updatedAt: Date.now() }
-            : session
-        ),
-        currentSession: state.currentSession?.id === sessionId
-          ? { ...state.currentSession, messages: [...state.currentSession.messages, message] }
-          : state.currentSession
+        sessions: updatedSessions,
+        currentSession: updatedCurrentSession
       };
     
     case 'SET_SESSIONS':

@@ -16,10 +16,11 @@ const queryClient = new QueryClient();
 
 function AppContent() {
   const { state } = useNova();
-  // Handle URL params reliably (works for both http://... and file:// loads)
+  // Fixed: Handle URL + global flag for prod (no ?mini=true on file load)
   const urlParams = new URLSearchParams(window.location.search);
-  const isMini = urlParams.get('mini') === 'true' || state.isMiniMode;
-  
+  const isMini = urlParams.get('mini') === 'true' || 
+                 (typeof window !== 'undefined' && (window as any).isMiniMode) || // Prod flag
+                 state.isMiniMode;
   if (isMini) {
     return <MiniWidget unreadCount={2} />;
   }

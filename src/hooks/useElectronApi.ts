@@ -21,26 +21,29 @@ export const useElectronApi = () => {
     requestExpand: () => console.log('Mock: requestExpand'),
     requestMinimize: () => console.log('Mock: requestMinimize'),
     setAlwaysOnTop: (flag: boolean) => console.log('Mock: setAlwaysOnTop', flag),
+    windowMinimize: () => console.log('Mock: windowMinimize'), // Fixed: Added missing mock
+    windowMaximize: () => console.log('Mock: windowMaximize'), // Fixed: Added missing mock
+    windowClose: () => console.log('Mock: windowClose'), // Fixed: Added missing mock
     transcribeStart: async (sessionId: string) => console.log('Mock: transcribeStart', sessionId),
     transcribeStop: async (sessionId: string) => console.log('Mock: transcribeStop', sessionId),
-    transcribeStream: (sessionId: string, cb: Function) => {
+    transcribeStream: (sessionId: string, cb: (text: string, partial: boolean) => void) => { // Fixed: Specific cb type
       console.log('Mock: transcribeStream', sessionId);
       // Simulate streaming transcript
       setTimeout(() => cb('Hello, this is a mock transcript...', true), 1000);
       setTimeout(() => cb('Hello, this is a mock transcript for testing.', false), 2000);
     },
-    listLocalModels: async () => ['whisper-base', 'whisper-small', 'whisper-medium'],
-    speak: async (text: string, voiceId?: string) => console.log('Mock: speak', text, voiceId),
-    sendMessage: async (message: string, sessionId?: string) => ({ sessionId: sessionId || 'mock-session' }),
-    onMessageStream: (cb: Function) => {
+    onMessageStream: (cb: (message: ChatMessage) => void) => { // Fixed: Specific cb type
       console.log('Mock: onMessageStream');
       return () => {};
     },
-    executeAction: async (action: any) => ({ ok: true }),
-    onAgentOpsUpdate: (cb: Function) => {
+    onAgentOpsUpdate: (cb: (ops: AgentOp[]) => void) => { // Fixed: Specific cb type
       console.log('Mock: onAgentOpsUpdate');
       return () => {};
     },
+    executeAction: async (action: { type: string; payload?: unknown }) => ({ ok: true }), // Fixed: payload unknown
+    listLocalModels: async () => ['whisper-base', 'whisper-small', 'whisper-medium'],
+    speak: async (text: string, voiceId?: string) => console.log('Mock: speak', text, voiceId),
+    sendMessage: async (message: string, sessionId?: string) => ({ sessionId: sessionId || 'mock-session' }),
     notify: (title: string, body?: string) => console.log('Mock: notify', title, body),
   };
 
@@ -152,15 +155,15 @@ export const useWindowControls = () => {
   const { api } = useElectronApi();
 
   const minimize = useCallback(() => {
-    api.windowMinimize?.();
+    api.windowMinimize?.(); // Fixed: Now safe with mock
   }, [api]);
 
   const maximize = useCallback(() => {
-    api.windowMaximize?.();
+    api.windowMaximize?.(); // Fixed: Now safe with mock
   }, [api]);
 
   const close = useCallback(() => {
-    api.windowClose?.();
+    api.windowClose?.(); // Fixed: Now safe with mock
   }, [api]);
 
   return { minimize, maximize, close };

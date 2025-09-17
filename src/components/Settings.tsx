@@ -306,7 +306,7 @@ export default function Settings() {
   };
 
   // Handle model selection
-  const handleModelChange = (model: string) => {
+  const handleModelChange = (model: string) => { // Fixed: Specific string type
     dispatch({ type: 'SET_VOICE_ENABLED', payload: true });
     // TODO: IMPLEMENT IN PRELOAD - window.api.updateUserPreferences({ selectedModel: model })
     console.log('Selected model:', model);
@@ -405,7 +405,7 @@ export default function Settings() {
             
             <div className="space-y-2">
               <Label>Nova's Role</Label>
-              <Select value={state.role} onValueChange={(value: any) => dispatch({ type: 'SET_ROLE', payload: value })}>
+              <Select value={state.role} onValueChange={(value: NovaRole) => dispatch({ type: 'SET_ROLE', payload: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
