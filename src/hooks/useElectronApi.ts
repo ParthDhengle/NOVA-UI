@@ -30,7 +30,10 @@ export const useElectronApi = () => {
       return { success: true };
     },
     setAlwaysOnTop: (flag: boolean) => console.log('Mock: setAlwaysOnTop', flag),
-    windowMinimize: () => console.log('Mock: windowMinimize'),
+    windowMinimize: async () => { // FIXED: Make async for consistency
+      console.log('Mock: windowMinimize (switching to mini)');
+      return { success: true };
+    },
     windowMaximize: () => console.log('Mock: windowMaximize'),
     windowClose: () => console.log('Mock: windowClose'),
     miniClose: () => console.log('Mock: miniClose'),
@@ -58,17 +61,16 @@ export const useElectronApi = () => {
     notify: (title: string, body?: string) => console.log('Mock: notify', title, body),
   };
   const api = isElectron ? window.api : mockApi;
-  
+ 
   // FIXED: Remove the test call—causes IPC loop/crash!
   console.log('HOOK: useElectronApi initialized, isElectron:', isElectron);
-  
+ 
   return {
     api,
     isElectron,
   };
 };
 
-// Rest of hooks unchanged...
 /**
  * Hook for managing agent operations state
  */
@@ -158,14 +160,21 @@ export const useVoiceTranscription = () => {
 export const useWindowControls = () => {
   const { api, isElectron } = useElectronApi();
   const [isExpanding, setIsExpanding] = useState(false);
-  const minimize = useCallback(() => {
+  const minimize = useCallback(async () => { // FIXED: Override to switch to mini
     try {
-      api.windowMinimize?.();
+      if (isElectron) {
+        // Switch to mini instead of taskbar minimize
+        await api.requestMinimize?.();
+        console.log('HOOK: Minimized to mini widget');
+      } else {
+        console.log('Mock: windowMinimize (switching to mini)');
+      }
     } catch (error) {
       console.error('Failed to minimize window:', error);
     }
-  }, [api]);
-  const maximize = useCallback(() => {
+  }, [api, isElectron]);
+
+const maximize = useCallback(() => {
     try {
       api.windowMaximize?.();
     } catch (error) {
@@ -186,22 +195,20 @@ export const useWindowControls = () => {
     }
     setIsExpanding(true);
     console.log('HOOK: Calling api.requestExpand...');
-   
     try {
       console.log('HOOK: About to await requestExpand...');
       const result = await api.requestExpand?.();
       console.log('HOOK: api.requestExpand succeeded:', result);
-     
+    
       // Add a small delay to ensure window switch completes
       await new Promise(resolve => setTimeout(resolve, 100));
-     
+    
       return result || { success: true };
     } catch (error) {
       console.error('HOOK: api.requestExpand failed:', error);
+      // FIXED: Reset on error too
+      setIsExpanding(false);
       return { success: false, error: error.message };
-    } finally {
-      // Reset expanding state after a delay
-      setTimeout(() => setIsExpanding(false), 1000);
     }
   }, [api, isExpanding]);
   const miniClose = useCallback(() => {

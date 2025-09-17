@@ -12,11 +12,10 @@ import Settings from './Settings';
 import AgentOpsPanel from './AgentOpsPanel';
 
 /**
- * MainLayout - Wraps all non-mini views with shared sidebar/topbar
- * Includes hamburger toggle for sidebar access/navigation
+ * MainLayout - Single source for Topbar/sidebar across views
  */
 interface MainLayoutProps {
-  children?: React.ReactNode; // For future extensibility, but uses view prop internally
+  children?: React.ReactNode;
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
@@ -27,11 +26,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
     dispatch({ type: 'SET_SIDEBAR_COLLAPSED', payload: !state.sidebarCollapsed });
   };
 
-  // Render content based on view (prevents "stuck" by always having navigation)
+  // Render content based on view (pure content—no layout dups)
   const renderContent = () => {
     switch (state.view) {
       case 'chat':
-        return <FullChat showSidebar={false} showAgentOps={true} />; // No duplicate sidebar
+        return <FullChat showAgentOps={true} />; // Pure chat, no sidebar/Topbar
       case 'scheduler':
         return <SchedulerKanban />;
       case 'dashboard':
@@ -43,23 +42,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
       case 'settings':
         return <Settings />;
       default:
-        return <FullChat showSidebar={false} showAgentOps={true} />;
+        return <FullChat showAgentOps={true} />;
     }
   };
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      {/* Topbar with Hamburger */}
-      <Topbar 
-        showSearch={state.view === 'chat'} // Search only in chat
-        // Pass toggle function if needed, but hamburger is here
-      >
-        {/* Hamburger Button - NEW */}
+      {/* Single Topbar with Hamburger */}
+      <Topbar showSearch={state.view === 'chat'}>
+        {/* Hamburger - Always present */}
         <Button
           size="sm"
           variant="ghost"
           onClick={toggleSidebar}
-          className="ml-2 w-8 h-8 p-0 lg:hidden" // Mobile-first, but show on desktop too for consistency
+          className="ml-2 w-8 h-8 p-0" // Show always, not just lg:hidden
         >
           <Menu size={16} />
         </Button>

@@ -114,6 +114,18 @@ export default function MiniWidget({
     await handleExpand();
   };
 
+  useEffect(() => {
+    const handleFocus = () => {
+      setIsExpanding(false);
+    };
+
+    window.addEventListener('focus', handleFocus);
+    // Reset on mount
+    setIsExpanding(false);
+
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
   // Auto-scroll preview
   useEffect(() => {
     scrollRef.current?.scrollTo({ 

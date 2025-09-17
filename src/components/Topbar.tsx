@@ -238,36 +238,6 @@ export default function Topbar({
               </>
             )}
           </Button>
-          {/* Custom Titlebar Buttons - existing */}
-          <div className="flex items-center gap-1 ml-auto"> {/* ml-auto pushes to right */}
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => window.api?.windowMinimize?.()} // Calls IPC
-              className="w-8 h-8 p-0 hover:bg-accent/10"
-              aria-label="Minimize"
-            >
-              <Minimize2 size={14} />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => window.api?.windowMaximize?.()} // Calls IPC
-              className="w-8 h-8 p-0 hover:bg-accent/10"
-              aria-label="Maximize"
-            >
-              <Maximize2 size={14} />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => window.api?.windowClose?.()} // Calls IPC to quit
-              className="w-8 h-8 p-0 hover:bg-destructive/10 text-destructive"
-              aria-label="Close"
-            >
-              <X size={14} />
-            </Button>
-          </div>
           {/* Privacy Indicator - existing */}
           <Badge
             variant="outline"
@@ -290,43 +260,29 @@ export default function Topbar({
               </Badge>
             </motion.div>
           )}
-          {/* Settings Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="w-8 h-8 p-0 rounded-lg"
-              >
-                <MoreVertical size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Nova Settings</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-             
-              <DropdownMenuItem onClick={() => dispatch({ type: 'SET_VIEW', payload: 'settings' })}>
-                <Settings className="mr-2 h-4 w-4" />
-                Open Settings
-              </DropdownMenuItem>
-             
-              <DropdownMenuItem onClick={() => dispatch({ type: 'SET_VIEW', payload: 'scheduler' })}>
-                <BookOpen className="mr-2 h-4 w-4" />
-                View Scheduler
-              </DropdownMenuItem>
-             
-              <DropdownMenuItem onClick={() => dispatch({ type: 'SET_VIEW', payload: 'dashboard' })}>
-                <MoreVertical className="mr-2 h-4 w-4" />
-                Dashboard
-              </DropdownMenuItem>
-             
-              <DropdownMenuSeparator />
-             
-              <DropdownMenuItem className="text-xs text-muted-foreground">
-                Nova v1.0.0 - Local AI Assistant
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Custom Titlebar Buttons */}
+<div className="flex items-center gap-1 ml-auto"> {/* ml-auto pushes to right */}
+  <Button
+    size="sm"
+    variant="ghost"
+    onClick={() => window.api?.requestMinimize?.()} // FIXED: Call requestMinimize to switch to mini
+    className="w-8 h-8 p-0 hover:bg-accent/10"
+    aria-label="Minimize to widget"
+  >
+    <Minimize2 size={14} />
+  </Button>
+  <Button
+    size="sm"
+    variant="ghost"
+    onClick={() => window.api?.windowClose?.()} // Calls IPC to quit
+    className="w-8 h-8 p-0 hover:bg-destructive/10 text-destructive"
+    aria-label="Close"
+  >
+    <X size={14} />
+  </Button>
+</div>
+          
+          
         </div>
       </div>
     </div>
