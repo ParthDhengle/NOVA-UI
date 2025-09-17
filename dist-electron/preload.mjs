@@ -1,8 +1,30 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
+console.log('PRELOAD: Starting preload script...'); // Log 1: Confirms preload loads
+
 contextBridge.exposeInMainWorld('api', {
-  requestExpand: () => ipcRenderer.invoke('requestExpand'),
-  requestMinimize: () => ipcRenderer.invoke('requestMinimize'),
+  requestExpand: async () => {
+    console.log('RENDERER: Calling requestExpand via IPC...'); // Log 2: Renderer side invoke start
+    try {
+      const result = await ipcRenderer.invoke('requestExpand');
+      console.log('RENDERER: requestExpand succeeded:', result); // Log 3: Success
+      return result;
+    } catch (error) {
+      console.error('RENDERER: requestExpand failed:', error); // Log 4: Catches silent errors (e.g., no handler)
+      throw error;
+    }
+  },
+  requestMinimize: async () => {
+    console.log('RENDERER: Calling requestMinimize...');
+    try {
+      const result = await ipcRenderer.invoke('requestMinimize');
+      console.log('RENDERER: requestMinimize succeeded:', result);
+      return result;
+    } catch (error) {
+      console.error('RENDERER: requestMinimize failed:', error);
+      throw error;
+    }
+  },
   setAlwaysOnTop: (flag) => ipcRenderer.invoke('setAlwaysOnTop', flag),
   windowMinimize: () => ipcRenderer.send("window:minimize"),
   windowMaximize: () => ipcRenderer.send("window:maximize"),
@@ -46,3 +68,5 @@ contextBridge.exposeInMainWorld('api', {
   },
   getAppVersion: () => ipcRenderer.invoke('getAppVersion'),
 });
+
+console.log('PRELOAD: contextBridge exposed window.api successfully'); // Log 5: Confirms exposure

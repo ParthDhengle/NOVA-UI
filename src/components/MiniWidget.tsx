@@ -51,20 +51,20 @@ export default function MiniWidget({
   const previewMessages = state.currentSession?.messages.slice(-3) || [];
 
   // FIXED: Handle expand with dev simulation
-  const handleExpand = () => {
-    if (miniMessage.trim()) {
-      // TODO: Send via API
-      console.log('Mini send:', miniMessage);
-      setMiniMessage('');
-    }
-    if (window.api) {
-      // Electron/prod: Call IPC to switch windows
-      ipcExpand();
-    } else {
-      // Dev/browser: Simulate by toggling state (renders full in same window)
-      dispatch({ type: 'SET_MINI_MODE', payload: false });
-    }
-  };
+// Inside MiniWidget (replace handleExpand only):
+const handleExpand = async () => {
+  if (miniMessage.trim()) {
+    console.log('Mini send:', miniMessage); // Optional: Handle send first
+    setMiniMessage('');
+  }
+  try {
+    console.log('MINI: Button clicked—awaiting IPC expand...'); // Log A: Renderer button
+    await ipcExpand(); // Awaits invoke from hook
+    console.log('MINI: IPC expand complete—window should switch'); // Log B: Success
+  } catch (error) {
+    console.error('MINI: Expand failed:', error); // Log C: Errors (e.g., no window.api)
+  }
+};
 
   // Auto-scroll preview
   useEffect(() => {

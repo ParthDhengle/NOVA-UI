@@ -147,8 +147,15 @@ export const useWindowControls = () => {
   const close = useCallback(() => {
     api.windowClose?.(); // Fixed: Now safe with mock
   }, [api]);
-  const expand = useCallback(() => { // NEW: Add expand
-    api.requestExpand?.();
-  }, [api]);
+  // In useWindowControls (replace expand only):
+const expand = useCallback(async () => { // FIXED: Make async
+  console.log('HOOK: Calling api.requestExpand...'); // Log D
+  try {
+    await api.requestExpand?.(); // Awaits the Promise
+    console.log('HOOK: api.requestExpand succeeded'); // Log E
+  } catch (error) {
+    console.error('HOOK: api.requestExpand failed:', error); // FIXED: Catch
+  }
+}, [api]);
   return { minimize, maximize, close, expand };
 };

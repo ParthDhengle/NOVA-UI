@@ -14,19 +14,15 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 function AppContent() {
   const { state } = useNova();
-  // Fixed: Handle URL + global flag for prod (no ?mini=true on file load)
+  // FIXED: Detect mini ONLY via URL/global (Electron prod) or ?mini (dev). Ignore state.isMiniMode to avoid override after IPC switch.
   const urlParams = new URLSearchParams(window.location.search);
-  const isMini = urlParams.get('mini') === 'true' ||
-                 (typeof window !== 'undefined' && (window as any).isMiniMode) || // Prod flag
-                 state.isMiniMode;
+  const isMiniFromUrl = urlParams.get('mini') === 'true';
+  const isMiniFromGlobal = typeof window !== 'undefined' && (window as any).isMiniMode;
+  const isMini = isMiniFromUrl || isMiniFromGlobal;
   if (isMini) {
     return <MiniWidget unreadCount={2} />;
   }
- 
-  if (state.isMiniMode) {
-    return <MiniWidget unreadCount={2} />;
-  }
-  // NEW: Wrap all views in MainLayout for consistent navigation
+  // FIXED: Removed redundant state.isMiniMode check—lets full UI render in mainWindow.
   return <MainLayout />;
 }
 const App = () => (

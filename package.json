@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist-electron/main.mjs",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development concurrently \"vite\" \"wait-on http://localhost:8080 && electronmon .\"",
+    "dev": "cross-env NODE_ENV=development concurrently \"vite\" \"wait-on http://localhost:5173 && electronmon .\"",
     "build": "vite build && electron-builder",
     "build:ui": "vite build",
     "build:dev": "vite build --mode development",
