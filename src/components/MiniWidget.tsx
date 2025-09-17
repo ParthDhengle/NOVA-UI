@@ -61,6 +61,8 @@ export default function MiniWidget({
       console.log('MINI: Button clicked—awaiting IPC expand...');
       await expand();
       console.log('MINI: IPC expand complete—window should switch');
+      // FIXED: Reset immediately after success
+      setIsExpanding(false);
     } catch (error) {
       console.error('MINI: Expand failed:', error);
       // Reset loading state on error
@@ -71,6 +73,7 @@ export default function MiniWidget({
   // Handle close
   const handleClose = () => {
     console.log('MINI: Close button clicked');
+    // Send specific mini close
     // Send specific mini close event
     if (window.api) {
       // Use electron's ipcRenderer to send mini:close event

@@ -157,6 +157,9 @@ export const useVoiceTranscription = () => {
 /**
  * Hook for managing window state with improved error handling
  */
+/**
+ * Hook for managing window state with improved error handling
+ */
 export const useWindowControls = () => {
   const { api, isElectron } = useElectronApi();
   const [isExpanding, setIsExpanding] = useState(false);
@@ -173,8 +176,7 @@ export const useWindowControls = () => {
       console.error('Failed to minimize window:', error);
     }
   }, [api, isElectron]);
-
-const maximize = useCallback(() => {
+  const maximize = useCallback(() => {
     try {
       api.windowMaximize?.();
     } catch (error) {
@@ -195,10 +197,14 @@ const maximize = useCallback(() => {
     }
     setIsExpanding(true);
     console.log('HOOK: Calling api.requestExpand...');
+  
     try {
       console.log('HOOK: About to await requestExpand...');
       const result = await api.requestExpand?.();
       console.log('HOOK: api.requestExpand succeeded:', result);
+    
+      // FIXED: Reset immediately on success
+      setIsExpanding(false);
     
       // Add a small delay to ensure window switch completes
       await new Promise(resolve => setTimeout(resolve, 100));
