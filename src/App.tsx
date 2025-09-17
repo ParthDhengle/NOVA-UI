@@ -4,21 +4,19 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { NovaProvider } from "@/context/NovaContext";
-import MiniWidget from "@/components/MiniWidget";
-import FullChat from "@/components/FullChat";
-import SchedulerKanban from "@/components/SchedulerKanban";
-import DashboardCard from "@/components/DashboardCard";
-import Settings from "@/components/Settings";
+import MiniWidget from "@/components/MiniWidget"; // Assume this exists
+import FullChat from "@/components/FullChat"; // Assume this exists
+import SchedulerKanban from "@/components/SchedulerKanban"; // Assume this exists
+import DashboardCard from "@/components/DashboardCard"; // Assume this exists
+import Settings from "@/components/Settings"; // Assume this exists
 import { useNova } from "@/context/NovaContext";
 import NotFound from "./pages/NotFound";
-import { useSearchParams } from 'react-router-dom';
 
 const queryClient = new QueryClient();
 
-
 function AppContent() {
   const { state } = useNova();
-  // FIX: Use window.location for Electron/static load
+  // Handle URL params reliably (works for both http://... and file:// loads)
   const urlParams = new URLSearchParams(window.location.search);
   const isMini = urlParams.get('mini') === 'true' || state.isMiniMode;
   

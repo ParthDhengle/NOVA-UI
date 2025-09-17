@@ -152,20 +152,16 @@ export const useWindowControls = () => {
   const { api } = useElectronApi();
 
   const minimize = useCallback(() => {
-    api.requestMinimize();
+    api.windowMinimize?.();
   }, [api]);
 
-  const expand = useCallback(() => {
-    api.requestExpand();
+  const maximize = useCallback(() => {
+    api.windowMaximize?.();
   }, [api]);
 
-  const setAlwaysOnTop = useCallback((flag: boolean) => {
-    api.setAlwaysOnTop(flag);
+  const close = useCallback(() => {
+    api.windowClose?.();
   }, [api]);
 
-  return {
-    minimize,
-    expand,
-    setAlwaysOnTop,
-  };
+  return { minimize, maximize, close };
 };

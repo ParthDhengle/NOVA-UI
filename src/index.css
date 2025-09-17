@@ -126,6 +126,39 @@ All colors MUST be HSL. Local-first, privacy-focused design language.
   .sidebar-nova {
     @apply bg-gradient-to-b from-background to-muted/20 border-r border-border backdrop-blur-sm;
   }
+  /* 🖥️ Custom Titlebar for Electron (frameless window) */
+  .titlebar {
+    -webkit-app-region: drag;
+    height: 32px; /* Standard titlebar height */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+  }
+
+  .titlebar-controls {
+    display: flex;
+    gap: 4px;
+  }
+
+  .titlebar-controls button {
+    -webkit-app-region: no-drag;
+    width: 46px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: hsl(var(--nova-text));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+
+  .titlebar-controls button:hover {
+    background-color: hsl(var(--nova-muted));
+    border-radius: 4px;
+  }
 }
 
 /* Nova keyframes */

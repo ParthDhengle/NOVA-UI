@@ -18,6 +18,7 @@ function createMainWindow() {
     minHeight: 600,
     frame: false, // Frameless for custom titlebar
     transparent: true, // For glassmorphism
+    resizable: true, // Enable resizing on Windows
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,
@@ -26,14 +27,20 @@ function createMainWindow() {
     backgroundColor: '#05060A', // Your black bg
   });
 
-  // Load your React build
-  mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  // Load URL in dev, file in prod (fixes blank window)
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.loadURL('http://localhost:8080');
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  }
 
   // Hide on start, show mini first
   mainWindow.hide();
 
   // Auto-open DevTools for debugging (remove in production)
-  mainWindow.webContents.openDevTools();
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.webContents.openDevTools();
+  }
 
   // Apply theme (CSS vars for dark cyan)
   mainWindow.webContents.on('did-finish-load', () => {
@@ -51,12 +58,13 @@ function createMainWindow() {
 
 function createMiniWindow() {
   miniWindow = new BrowserWindow({
-    width: 100,
-    height: 100,
+    width: 400, // Increased for small chat interface
+    height: 600,
     frame: false,
     transparent: true,
     alwaysOnTop: true, // Stays on top of other apps
     skipTaskbar: true, // No taskbar icon
+    resizable: false, // Fixed size for mini
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,
@@ -65,19 +73,30 @@ function createMiniWindow() {
     backgroundColor: '#05060A',
   });
 
-  // Load MiniWidget as standalone (FIX: Use miniWindow.loadFile, add ?mini=true)
-  miniWindow.loadFile(path.join(__dirname, '../dist/index.html?mini=true'));
+  // Load MiniWidget with ?mini=true (URL in dev, file in prod)
+  let miniLoadPath;
+  if (process.env.NODE_ENV === 'development') {
+    miniLoadPath = 'http://localhost:8080?mini=true';
+    miniWindow.loadURL(miniLoadPath);
+  } else {
+    miniLoadPath = path.join(__dirname, '../dist/index.html');
+    miniWindow.loadFile(miniLoadPath);
+    // Manually set mini mode for prod file load (no query params)
+    miniWindow.webContents.executeJavaScript("window.location.search = '?mini=true';");
+  }
 
   // Auto-open DevTools for debugging (remove in production)
-  miniWindow.webContents.openDevTools();
+  if (process.env.NODE_ENV === 'development') {
+    miniWindow.webContents.openDevTools();
+  }
 
-  // Draggable: Make whole window draggable
+  // Draggable: Whole window draggable (CSS handles no-drag for buttons)
   miniWindow.setIgnoreMouseEvents(false, { forward: false });
 
-  // Click-outside to minimize (shrink to mini)
+  // Optional: Blur to hide mini (if you want auto-minimize on click-away)
   miniWindow.on('blur', () => {
     if (mainWindow && !mainWindow.isVisible()) {
-      miniWindow.webContents.send('minimize-widget'); // Trigger UI shrink
+      miniWindow.webContents.send('minimize-widget'); // Trigger UI shrink if needed
     }
   });
 }
@@ -109,14 +128,20 @@ ipcMain.handle('setAlwaysOnTop', (event, flag) => {
 });
 
 // Custom titlebar IPC (minimize, maximize, close)
-ipcMain.handle('window-minimize', () => {
-  if (mainWindow) mainWindow.minimize();
+ipcMain.on("window:minimize", () => {
+  mainWindow?.minimize();
 });
-ipcMain.handle('window-maximize', () => {
-  if (mainWindow) mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
+
+ipcMain.on("window:maximize", () => {
+  if (mainWindow?.isMaximized()) {
+    mainWindow.unmaximize();
+  } else {
+    mainWindow?.maximize();
+  }
 });
-ipcMain.handle('window-close', () => {
-  app.quit();
+
+ipcMain.on("window:close", () => {
+  mainWindow?.close();
 });
 
 // Voice (local Whisper via Python - stub for now)

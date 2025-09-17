@@ -4,10 +4,9 @@ contextBridge.exposeInMainWorld('api', {
   requestExpand: () => ipcRenderer.invoke('requestExpand'),
   requestMinimize: () => ipcRenderer.invoke('requestMinimize'),
   setAlwaysOnTop: (flag) => ipcRenderer.invoke('setAlwaysOnTop', flag),
-  windowMinimize: () => ipcRenderer.invoke('window-minimize'), // NEW
-  windowMaximize: () => ipcRenderer.invoke('window-maximize'), // NEW
-  windowClose: () => ipcRenderer.invoke('window-close'), // NEW
-  transcribeStart: (sessionId) => ipcRenderer.invoke('transcribeStart', sessionId),
+  windowMinimize: () => ipcRenderer.send("window:minimize"),
+  windowMaximize: () => ipcRenderer.send("window:maximize"),
+  windowClose: () => ipcRenderer.send("window:close"),  transcribeStart: (sessionId) => ipcRenderer.invoke('transcribeStart', sessionId),
   transcribeStop: (sessionId) => ipcRenderer.invoke('transcribeStop', sessionId),
   transcribeStream: (sessionId, cb) => {
     ipcRenderer.on(`transcribe-stream-${sessionId}`, (event, text, partial) => cb(text, partial));
