@@ -35,7 +35,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useNova } from '@/context/NovaContext';
 import type { NovaRole } from '@/api/types';
-
+import { Minimize2, Maximize2, X } from 'lucide-react';
 /**
  * Nova Topbar - Role switching, search, and voice controls
  * 
@@ -224,7 +224,7 @@ export default function Topbar({
 
         {/* Right Section - Controls */}
         <div className="flex items-center gap-2">
-          {/* Voice Control */}
+          {/* Voice Control - existing */}
           <Button
             size="sm"
             variant={state.voiceEnabled ? 'default' : 'outline'}
@@ -244,7 +244,38 @@ export default function Topbar({
             )}
           </Button>
 
-          {/* Privacy Indicator */}
+          {/* Custom Titlebar Buttons - NEW */}
+          <div className="flex items-center gap-1 ml-auto"> {/* ml-auto pushes to right */}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => window.api?.windowMinimize?.()} // Calls IPC
+              className="w-8 h-8 p-0 hover:bg-accent/10"
+              aria-label="Minimize"
+            >
+              <Minimize2 size={14} />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => window.api?.windowMaximize?.()} // Calls IPC
+              className="w-8 h-8 p-0 hover:bg-accent/10"
+              aria-label="Maximize"
+            >
+              <Maximize2 size={14} />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => window.api?.windowClose?.()} // Calls IPC to quit
+              className="w-8 h-8 p-0 hover:bg-destructive/10 text-destructive"
+              aria-label="Close"
+            >
+              <X size={14} />
+            </Button>
+          </div>
+
+          {/* Privacy Indicator - existing */}
           <Badge 
             variant="outline" 
             className="bg-green-500/10 text-green-400 border-green-500/20 text-xs"

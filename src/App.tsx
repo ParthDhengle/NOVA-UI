@@ -17,9 +17,10 @@ const queryClient = new QueryClient();
 
 
 function AppContent() {
-  const [searchParams] = useSearchParams();
   const { state } = useNova();
-  const isMini = searchParams.get('mini') === 'true' || state.isMiniMode;
+  // FIX: Use window.location for Electron/static load
+  const urlParams = new URLSearchParams(window.location.search);
+  const isMini = urlParams.get('mini') === 'true' || state.isMiniMode;
   
   if (isMini) {
     return <MiniWidget unreadCount={2} />;

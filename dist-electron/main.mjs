@@ -32,6 +32,9 @@ function createMainWindow() {
   // Hide on start, show mini first
   mainWindow.hide();
 
+  // Auto-open DevTools for debugging (remove in production)
+  mainWindow.webContents.openDevTools();
+
   // Apply theme (CSS vars for dark cyan)
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.webContents.insertCSS(`
@@ -62,8 +65,11 @@ function createMiniWindow() {
     backgroundColor: '#05060A',
   });
 
-  // Load MiniWidget as standalone (your MiniWidget.tsx exports a component)
-  mainWindow.loadFile(path.join(__dirname, '../dist/index.html?minimrue'));
+  // Load MiniWidget as standalone (FIX: Use miniWindow.loadFile, add ?mini=true)
+  miniWindow.loadFile(path.join(__dirname, '../dist/index.html?mini=true'));
+
+  // Auto-open DevTools for debugging (remove in production)
+  miniWindow.webContents.openDevTools();
 
   // Draggable: Make whole window draggable
   miniWindow.setIgnoreMouseEvents(false, { forward: false });
@@ -100,6 +106,17 @@ ipcMain.handle('requestMinimize', () => {
 ipcMain.handle('setAlwaysOnTop', (event, flag) => {
   if (mainWindow) mainWindow.setAlwaysOnTop(flag);
   if (miniWindow) miniWindow.setAlwaysOnTop(flag);
+});
+
+// Custom titlebar IPC (minimize, maximize, close)
+ipcMain.handle('window-minimize', () => {
+  if (mainWindow) mainWindow.minimize();
+});
+ipcMain.handle('window-maximize', () => {
+  if (mainWindow) mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
+});
+ipcMain.handle('window-close', () => {
+  app.quit();
 });
 
 // Voice (local Whisper via Python - stub for now)

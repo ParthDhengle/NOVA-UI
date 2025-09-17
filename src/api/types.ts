@@ -75,6 +75,9 @@ declare global {
       requestExpand(): void;
       requestMinimize(): void;
       setAlwaysOnTop(flag: boolean): void;
+      windowMinimize(): void; // NEW: Minimize the window
+      windowMaximize(): void; // NEW: Maximize/restore the window
+      windowClose(): void; // NEW: Close the app
 
       // Voice / Local Whisper
       transcribeStart(sessionId: string): Promise<void>;
